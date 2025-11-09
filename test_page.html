@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page - Timer Based Navigation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .content {
+            min-height: 400px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
+        
+        .timer-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            border: 2px solid #2196F3;
+        }
+        
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            color: #1976D2;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .timer-label {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        #nextBtn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        #nextBtn:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        
+        #nextBtn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .page-info {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .status.waiting {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .status.ready {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .scroll-content {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border-left: 4px solid #667eea;
+        }
+        
+        .scroll-content p {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-info">
+            <strong>📍 Current Page: <span id="pageNumber">1</span></strong> | 
+            <span id="pageTimer"></span>
+        </div>
+        
+        <h1>Test Page for Automated Navigation</h1>
+        
+        <div class="content">
+            <h2>Page Content</h2>
+            <p>This is a test page that simulates a website with timer-based navigation.</p>
+            <p>The "Next Page" button below will be disabled until a random timer expires.</p>
+            <p><strong>Page <span id="pageNum">1</span></strong> - Each page has a different timer duration to test the navigator's ability to handle variable wait times.</p>
+        </div>
+        
+        <div class="scroll-content">
+            <h3>Additional Content (Scroll Required)</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+            <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores.</p>
+        </div>
+        
+        <div class="timer-section">
+            <div class="timer-label">Time Remaining:</div>
+            <div class="timer" id="timerDisplay">--:--</div>
+            <div class="status waiting" id="statusDisplay">⏳ Button is disabled - waiting for timer...</div>
+            
+            <button id="nextBtn" disabled>Next Page ➔</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let timeRemaining = 0;
+        let timerInterval = null;
+        
+        // Random timer between 10 and 20 seconds (for testing)
+        function getRandomTimer() {
+            return Math.floor(Math.random() * 11) + 10; // 10-20 seconds
+        }
+        
+        function startTimer() {
+            const nextBtn = document.getElementById('nextBtn');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const statusDisplay = document.getElementById('statusDisplay');
+            
+            // Disable button
+            nextBtn.disabled = true;
+            nextBtn.style.pointerEvents = 'none';
+            
+            // Set random timer
+            timeRemaining = getRandomTimer();
+            document.getElementById('pageTimer').textContent = `Timer: ${timeRemaining} seconds`;
+            
+            // Update status
+            statusDisplay.className = 'status waiting';
+            statusDisplay.textContent = '⏳ Button is disabled - waiting for timer...';
+            
+            // Start countdown
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    
+                    // Enable button
+                    nextBtn.disabled = false;
+                    nextBtn.style.pointerEvents = 'auto';
+                    
+                    // Update status
+                    statusDisplay.className = 'status ready';
+                    statusDisplay.textContent = '✅ Button is now clickable!';
+                    
+                    timerDisplay.textContent = '00:00';
+                }
+            }, 1000);
+        }
+        
+        function goToNextPage() {
+            currentPage++;
+            
+            // Update page number in URL
+            const newUrl = `${window.location.pathname}?page=${currentPage}`;
+            window.history.pushState({page: currentPage}, '', newUrl);
+            
+            // Update page display
+            document.getElementById('pageNumber').textContent = currentPage;
+            document.getElementById('pageNum').textContent = currentPage;
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+            
+            // Start new timer
+            startTimer();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check URL for page number
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageParam = urlParams.get('page');
+            if (pageParam) {
+                currentPage = parseInt(pageParam);
+                document.getElementById('pageNumber').textContent = currentPage;
+                document.getElementById('pageNum').textContent = currentPage;
+            }
+            
+            // Start initial timer
+            startTimer();
+            
+            // Attach click handler
+            document.getElementById('nextBtn').addEventListener('click', goToNextPage);
+        });
+        
+        // Log to console for debugging
+        console.log('Test page loaded. Timer-based navigation active.');
+    </script>
+</body>
+</html>
+
